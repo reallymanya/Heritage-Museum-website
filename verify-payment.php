@@ -1,75 +1,92 @@
 <?php
 session_start();
 require_once 'includes/razorpay-config.php';
-require_once 'includes/db-connect.php';
+require_once 'includes/db.php';
 
-// Check if user is logged in and has booking details
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['booking_details'])) {
-    header("Location: login.php");
-    exit();
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
 }
 
-// Get payment details from Razorpay
-$payment_id = $_POST['razorpay_payment_id'] ?? null;
-$order_id = $_POST['razorpay_order_id'] ?? null;
-$signature = $_POST['razorpay_signature'] ?? null;
-
-if (!$payment_id || !$order_id || !$signature) {
-    $_SESSION['error'] = "Invalid payment details";
-    header("Location: tickets.php");
-    exit();
+// Check if payment details are present
+if (!isset($_GET['payment_id']) || !isset($_GET['order_id']) || !isset($_GET['signature'])) {
+    header('Location: booking-failed.php?error=' . urlencode('Payment verification failed - missing parameters'));
+    exit;
 }
-
-// Verify payment signature
-$api = new Razorpay\Api\Api($keyId, $keySecret);
-$attributes = array(
-    'razorpay_order_id' => $order_id,
-    'razorpay_payment_id' => $payment_id,
-    'razorpay_signature' => $signature
-);
 
 try {
+    $api = getRazorpayInstance();
+    
+    // Fetch payment details from Razorpay
+    $payment = $api->payment->fetch($_GET['payment_id']);
+    
+    // Check payment status
+    if ($payment->status !== 'captured') {
+        throw new Exception('Payment was not successful. Status: ' . $payment->status);
+    }
+    
+    // Verify payment signature
+    $attributes = array(
+        'razorpay_signature' => $_GET['signature'],
+        'razorpay_payment_id' => $_GET['payment_id'],
+        'razorpay_order_id' => $_GET['order_id']
+    );
+    
     $api->utility->verifyPaymentSignature($attributes);
     
-    // Payment successful, create booking record
-    $booking_details = $_SESSION['booking_details'];
+    // Only generate ticket and save booking if payment is successful
+    $ticketNumber = 'TKT' . strtoupper(uniqid());
     
-    $stmt = $pdo->prepare("INSERT INTO bookings (
-        user_id, exhibition_id, entry_type, visit_date, visit_time,
-        adult_tickets, child_tickets, total_amount, payment_id, order_id,
-        status, created_at
-    ) VALUES (
-        :user_id, :exhibition_id, :entry_type, :visit_date, :visit_time,
-        :adult_tickets, :child_tickets, :total_amount, :payment_id, :order_id,
-        'confirmed', NOW()
-    )");
+    // Save booking details to database
+    $stmt = $conn->prepare("INSERT INTO bookings (user_id, show_id, show_name, num_tickets, total_amount, visitor_name, show_time, mobile_number, payment_id, ticket_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     
-    $stmt->execute([
-        'user_id' => $_SESSION['user_id'],
-        'exhibition_id' => $booking_details['exhibition_id'],
-        'entry_type' => $booking_details['entry_type'],
-        'visit_date' => $booking_details['visit_date'],
-        'visit_time' => $booking_details['visit_time'],
-        'adult_tickets' => $booking_details['adult_tickets'],
-        'child_tickets' => $booking_details['child_tickets'],
-        'total_amount' => $booking_details['total_amount'],
-        'payment_id' => $payment_id,
-        'order_id' => $order_id
-    ]);
+    if (!$stmt) {
+        throw new Exception("Failed to prepare statement: " . $conn->error);
+    }
     
-    $booking_id = $pdo->lastInsertId();
+    $stmt->bind_param("iisidsssss", 
+        $_SESSION['user_id'],
+        $_SESSION['show_id'],
+        $_SESSION['show_name'],
+        $_SESSION['num_tickets'],
+        $_SESSION['total_amount'],
+        $_SESSION['visitor_name'],
+        $_SESSION['show_time'],
+        $_SESSION['mobile_number'],
+        $_GET['payment_id'],
+        $ticketNumber
+    );
     
-    // Clear session data
-    unset($_SESSION['booking_details']);
-    unset($_SESSION['order_id']);
+    if (!$stmt->execute()) {
+        throw new Exception("Failed to save booking: " . $stmt->error);
+    }
     
-    // Redirect to booking confirmation page
-    header("Location: booking-confirmation.php?id=" . $booking_id);
-    exit();
+    // Store ticket number in session for success page
+    $_SESSION['ticket_number'] = $ticketNumber;
+    
+    // Clear booking session variables
+    $booking_vars = ['show_id', 'show_name', 'show_price', 'num_tickets', 'visitor_name', 'show_time', 'mobile_number', 'total_amount', 'booking_state'];
+    foreach ($booking_vars as $var) {
+        unset($_SESSION[$var]);
+    }
+    
+    // Redirect to success page
+    header('Location: booking-success.php');
+    exit;
     
 } catch (Exception $e) {
-    $_SESSION['error'] = "Payment verification failed: " . $e->getMessage();
-    header("Location: tickets.php");
-    exit();
+    // Log error for debugging
+    error_log("Payment verification failed: " . $e->getMessage());
+    
+    // Clear booking session variables on failure
+    $booking_vars = ['show_id', 'show_name', 'show_price', 'num_tickets', 'visitor_name', 'show_time', 'mobile_number', 'total_amount', 'booking_state'];
+    foreach ($booking_vars as $var) {
+        unset($_SESSION[$var]);
+    }
+    
+    // Redirect to error page with appropriate message
+    header('Location: booking-failed.php?error=' . urlencode('Booking could not be completed: Payment verification failed'));
+    exit;
 }
 ?>

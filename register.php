@@ -13,27 +13,35 @@ if (isset($_SESSION['user_id'])) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
-        $first_name = $_POST['first_name'];
-        $last_name = $_POST['last_name'];
-        $email = $_POST['email'];
+        $username = $_POST['username'];
+        // $last_name = $_POST['last_name'];
+        // $email = $_POST['email'];
         $password = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
+        // $confirm_password = $_POST['confirm_password'];
 
         // Validate password match
-        if ($password !== $confirm_password) {
-            $_SESSION['error'] = "Passwords do not match.";
-            header("Location: register.php");
+        // if ($password !== $confirm_password) {
+        //     $_SESSION['error'] = "Passwords do not match.";
+        //     header("Location: register.php");
+        //     exit();
+        // }
+
+        $captcha = $_POST['captcha'];
+
+        // Verify captcha
+        if (!isset($_SESSION['captcha']) || strtolower($captcha) != strtolower($_SESSION['captcha'])) {
+            echo "<script>showAlert('Invalid captcha! Please try again.', 'error');</script>";
             exit();
         }
 
         // Check if email already exists
-        $check_stmt = $conn->prepare("SELECT email FROM users WHERE email = ?");
-        $check_stmt->bind_param("s", $email);
+        $check_stmt = $conn->prepare("SELECT username FROM users WHERE username = ?");
+        $check_stmt->bind_param("s", $username);
         $check_stmt->execute();
         $check_stmt->store_result();
         
         if ($check_stmt->num_rows > 0) {
-            $_SESSION['error'] = "Email already exists. Please use another email.";
+            $_SESSION['error'] = "Username already exists. Please use another username.";
             header("Location: register.php");
             exit();
         }
@@ -43,18 +51,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
         // Insert new user into database
-        $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $first_name, $last_name, $email, $hashed_password);
+        $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+        $stmt->bind_param("ss", $username, $hashed_password);
 
         if ($stmt->execute()) {
             // Get the newly created user's ID
             $user_id = $stmt->insert_id;
             
             // Set session variables
-            $_SESSION['user'] = $email;
+            $_SESSION['user'] = $username;
             $_SESSION['user_id'] = $user_id;
-            $_SESSION['first_name'] = $first_name;
-            $_SESSION['last_name'] = $last_name;
+            
+            // $_SESSION['first_name'] = $first_name;
+            // $_SESSION['last_name'] = $last_name;
+
+            unset($_SESSION['captcha']);
+            echo "<script>
+                showAlert('Registration successful! You can now login.', 'success');
+                setTimeout(() => window.location.href = 'login.php', 2000);
+            </script>";
             
             // Clear any error messages
             unset($_SESSION['error']);
@@ -81,7 +96,91 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Sign Up - Heritage Museum</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .form-group { margin-bottom: 1rem; }
+        .input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-group i {
+    position: absolute;
+    left: 1rem;
+    color: #8B4513;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: #8B4513;
+    box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.1);
+    outline: none;
+}
+
+.captcha-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.captcha-group img {
+    height: 60px;
+    width: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.refresh-btn {
+    background: #8B4513;
+    border: none;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+    background: #A0522D;
+    transform: rotate(180deg);
+}
+
+.refresh-btn i {
+    font-size: 1.2rem;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+    </style>
 </head>
 <body class="bg-[#F5F5DC] font-['Inter']">
     <!-- Navbar -->
@@ -112,26 +211,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <form method="POST" action="" class="space-y-6">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block mb-2">First Name</label>
-                                <input type="text" name="first_name" class="w-full p-2 border rounded" placeholder="First name" required>
+                                <label class="block mb-2">Username</label>
+                                <input type="text" name="username" class="w-full p-2 border rounded" placeholder="User name" required>
                             </div>
-                            <div>
+                            <!-- <div>
                                 <label class="block mb-2">Last Name</label>
                                 <input type="text" name="last_name" class="w-full p-2 border rounded" placeholder="Last name" required>
-                            </div>
+                            </div> -->
                         </div>
-                        <div>
+                        <!-- <div>
                             <label class="block mb-2">Email</label>
                             <input type="email" name="email" class="w-full p-2 border rounded" placeholder="Enter your email" required>
-                        </div>
+                        </div> -->
                         <div>
                             <label class="block mb-2">Password</label>
                             <input type="password" name="password" class="w-full p-2 border rounded" placeholder="Create a password" required>
                         </div>
-                        <div>
+                        <!-- <div>
                             <label class="block mb-2">Confirm Password</label>
                             <input type="password" name="confirm_password" class="w-full p-2 border rounded" placeholder="Confirm your password" required>
-                        </div>
+                        </div> -->
+
+                        <div class="form-group">
+                <div class="captcha-group">
+                    <img src="includes/captcha.php?v=<?php echo time(); ?>" alt="CAPTCHA" id="captcha-image">
+                    <button type="button" onclick="refreshCaptcha()" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-shield-alt"></i>
+                    <input type="text" id="captcha" name="captcha" placeholder="Enter Code" required>
+                </div>
+            </div>
+
+
+
                         <div class="flex items-center">
                             <input type="checkbox" class="mr-2" required>
                             <label class="text-sm text-gray-600">I agree to the <a href="#" class="text-[#8B4513] hover:text-[#A0522D]">Terms of Service</a> and <a href="#" class="text-[#8B4513] hover:text-[#A0522D]">Privacy Policy</a></label>
@@ -184,7 +299,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </footer>
+    <script>
+function refreshCaptcha() {
+    document.getElementById('captcha-image').src = 'includes/captcha.php?' + Date.now();
+}
 
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.innerHTML = `
+        <div class="alert-content">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="alert-close">&times;</button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => alertDiv.remove(), 5000);
+}
+</script>
     <script src="js/main.js"></script>
 </body>
-</html> 
+</html>

@@ -49,6 +49,22 @@ include 'includes/header.php';
             <div class="max-w-2xl mx-auto">
                 <div class="vintage-card">
                     <h3 class="text-2xl font-['SF_Pro_Display'] tracking-tight mb-6">Send us a Message</h3>
+                    
+                    <!-- Display success or error messages -->
+                    <?php if (isset($_SESSION['success'])): ?>
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span class="block sm:inline"><?php echo $_SESSION['success']; ?></span>
+                        </div>
+                        <?php unset($_SESSION['success']); ?>
+                    <?php endif; ?>
+                    
+                    <?php if (isset($_SESSION['error'])): ?>
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span class="block sm:inline"><?php echo $_SESSION['error']; ?></span>
+                        </div>
+                        <?php unset($_SESSION['error']); ?>
+                    <?php endif; ?>
+                    
                     <form class="space-y-6" action="process-contact.php" method="POST">
                         <div>
                             <label class="block mb-2">Name</label>

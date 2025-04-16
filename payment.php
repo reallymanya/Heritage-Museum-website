@@ -14,8 +14,13 @@ if (!isset($_SESSION['total_amount']) || !isset($_GET['amount'])) {
     exit;
 }
 
-// Verify amount matches
-if ($_SESSION['total_amount'] != $_GET['amount']) {
+// Convert amounts to float for comparison
+$sessionAmount = (float)$_SESSION['total_amount'];
+$urlAmount = (float)$_GET['amount'];
+
+// Verify amount matches (with small tolerance for floating point comparison)
+if (abs($sessionAmount - $urlAmount) > 0.01) {
+    error_log("Amount mismatch - Session: $sessionAmount, URL: $urlAmount");
     header('Location: index.php');
     exit;
 }
@@ -24,6 +29,7 @@ if ($_SESSION['total_amount'] != $_GET['amount']) {
 $required_vars = ['total_amount', 'show_id', 'show_name', 'num_tickets', 'visitor_name', 'show_time', 'mobile_number'];
 foreach ($required_vars as $var) {
     if (!isset($_SESSION[$var])) {
+        error_log("Missing required session variable: $var");
         header('Location: index.php');
         exit;
     }
@@ -187,6 +193,12 @@ foreach ($required_vars as $var) {
                             'payment_id=' + response.razorpay_payment_id + 
                             '&order_id=' + response.razorpay_order_id + 
                             '&signature=' + response.razorpay_signature;
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            // Handle payment cancellation
+                            window.location.href = 'booking-failed.php?error=' + encodeURIComponent('Payment was cancelled');
+                        }
                     },
                     prefill: {
                         name: '<?php echo addslashes($_SESSION['visitor_name']); ?>',

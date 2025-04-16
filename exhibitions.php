@@ -16,8 +16,8 @@ include 'includes/header.php';
                     <h3 class="text-2xl font-['SF_Pro_Display'] tracking-tight mb-2 text-[#8B4513]">Mughal Era Treasures</h3>
                     <p class="text-gray-700">Explore the opulent world of Mughal art and architecture.</p>
                     <div class="mt-4 flex justify-between items-center">
-                        <span class="text-[#8B4513] font-semibold">₹500</span>
-                        <a href="tickets.php?exhibition_id=1&price=500" class="bg-[#8B4513] text-white px-4 py-2 rounded-full hover:bg-[#A0522D] transition-colors duration-300">Book Now</a>
+                        <span class="text-[#8B4513] font-semibold">₹100</span>
+                        <a href="tickets.php?exhibition_id=1&price=100" class="bg-[#8B4513] text-white px-4 py-2 rounded-full hover:bg-[#A0522D] transition-colors duration-300">Get Info</a>
                     </div>
                 </div>
                 <div class="vintage-card transform hover:scale-105 transition-transform duration-300 shadow-xl group">
@@ -28,8 +28,8 @@ include 'includes/header.php';
                     <h3 class="text-2xl font-['SF_Pro_Display'] tracking-tight mb-2 text-[#8B4513]">Ancient Indian Civilizations</h3>
                     <p class="text-gray-700">Journey through time to discover India's ancient heritage.</p>
                     <div class="mt-4 flex justify-between items-center">
-                        <span class="text-[#8B4513] font-semibold">₹450</span>
-                        <a href="tickets.php?exhibition_id=2&price=450" class="bg-[#8B4513] text-white px-4 py-2 rounded-full hover:bg-[#A0522D] transition-colors duration-300">Book Now</a>
+                        <span class="text-[#8B4513] font-semibold">₹75</span>
+                        <a href="tickets.php?exhibition_id=2&price=75" class="bg-[#8B4513] text-white px-4 py-2 rounded-full hover:bg-[#A0522D] transition-colors duration-300">Get Info</a>
                     </div>
                 </div>
                 <div class="vintage-card transform hover:scale-105 transition-transform duration-300 shadow-xl group">
@@ -40,8 +40,8 @@ include 'includes/header.php';
                     <h3 class="text-2xl font-['SF_Pro_Display'] tracking-tight mb-2 text-[#8B4513]">Modern Art Revolution</h3>
                     <p class="text-gray-700">Witness the evolution of Indian art in the modern era.</p>
                     <div class="mt-4 flex justify-between items-center">
-                        <span class="text-[#8B4513] font-semibold">₹550</span>
-                        <a href="tickets.php?exhibition_id=3&price=550" class="bg-[#8B4513] text-white px-4 py-2 rounded-full hover:bg-[#A0522D] transition-colors duration-300">Book Now</a>
+                        <span class="text-[#8B4513] font-semibold">₹150</span>
+                        <a href="tickets.php?exhibition_id=3&price=150" class="bg-[#8B4513] text-white px-4 py-2 rounded-full hover:bg-[#A0522D] transition-colors duration-300">Get Info</a>
                     </div>
                 </div>
                 <div class="vintage-card transform hover:scale-105 transition-transform duration-300 shadow-xl group">
@@ -52,8 +52,8 @@ include 'includes/header.php';
                     <h3 class="text-2xl font-['SF_Pro_Display'] tracking-tight mb-2 text-[#8B4513]">Digital Art & Technology</h3>
                     <p class="text-gray-700">Explore the intersection of traditional art and modern technology.</p>
                     <div class="mt-4 flex justify-between items-center">
-                        <span class="text-[#8B4513] font-semibold">₹600</span>
-                        <a href="tickets.php?exhibition_id=4&price=600" class="bg-[#8B4513] text-white px-4 py-2 rounded-full hover:bg-[#A0522D] transition-colors duration-300">Book Now</a>
+                        <span class="text-[#8B4513] font-semibold">₹150</span>
+                        <a href="tickets.php?exhibition_id=4&price=150" class="bg-[#8B4513] text-white px-4 py-2 rounded-full hover:bg-[#A0522D] transition-colors duration-300">Get Info</a>
                     </div>
                 </div>
             </div>
@@ -71,7 +71,7 @@ include 'includes/header.php';
                     <p class="text-gray-700 mb-4">Explore the architectural marvels of Indian temples, from Dravidian to Nagara styles.</p>
                     <div class="flex justify-between items-center">
                         <span class="text-[#8B4513] font-semibold">Starting May 1, 2025</span>
-                        <a href="tickets.php" class="vintage-button">Pre-book Now</a>
+                        <a href="tickets.php" class="vintage-button">Get Info</a>
                     </div>
                 </div>
                 <div class="exhibition-card">
@@ -80,7 +80,7 @@ include 'includes/header.php';
                     <p class="text-gray-700 mb-4">Discover the rich heritage of Indian classical music through rare instruments and manuscripts.</p>
                     <div class="flex justify-between items-center">
                         <span class="text-[#8B4513] font-semibold">Starting March 15, 2025</span>
-                        <a href="tickets.php" class="vintage-button">Pre-book Now</a>
+                        <a href="tickets.php" class="vintage-button">Get Info</a>
                     </div>
                 </div>
             </div>

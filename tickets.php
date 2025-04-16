@@ -1,160 +1,145 @@
 <?php
 session_start();
 include 'includes/header.php';
-include 'includes/razorpay-config.php';
-
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-
-// Get exhibition details if passed
-$exhibition_id = isset($_GET['exhibition_id']) ? $_GET['exhibition_id'] : null;
-$exhibition_price = isset($_GET['price']) ? $_GET['price'] : 500; // Default price
 ?>
 
-    <!-- Ticket Booking Section -->
+    <!-- Hero Section -->
+    <section class="py-20 relative" style="background-image: url('images/musuem-bg.png'); background-size: cover; background-position: center;">
+        <div class="absolute inset-0 bg-black opacity-50"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="max-w-3xl mx-auto text-center text-white">
+                <h1 class="text-5xl font-['SF_Pro_Display'] tracking-tight mb-6 animate-fade-in">Discover Our Heritage</h1>
+                <p class="text-xl mb-8 animate-slide-up">Explore the rich cultural heritage of India through our fascinating exhibitions and collections.</p>
+                <div class="flex justify-center space-x-4">
+                    <img src="images/collection1.jpg" alt="Collection 1" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg animate-slide-up" style="animation-delay: 0s;">
+                    <img src="images/collection2.jpg" alt="Collection 2" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg animate-slide-up" style="animation-delay: 0.5s;">
+                    <img src="images/collection3.jpg" alt="Collection 3" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg animate-slide-up" style="animation-delay: 1s;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ticket Information Section -->
     <section class="py-16 bg-[#F5F5DC]">
         <div class="container mx-auto px-4">
-            <h2 class="text-4xl font-['SF_Pro_Display'] tracking-tight text-center mb-12">Book Your Tickets</h2>
-            <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-                <form id="bookingForm" action="process-payment.php" method="POST" class="space-y-6">
-                    <?php if (isset($_SESSION['error'])): ?>
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                            <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+            <h2 class="text-4xl font-['SF_Pro_Display'] tracking-tight text-center mb-12">Ticket Information</h2>
+            
+            <!-- Ticket Types -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <!-- Regular Ticket -->
+                <div class="vintage-card p-6 transform transition-all duration-500 hover:scale-105 hover:shadow-xl animate-slide-up">
+                    <div class="relative mb-4 overflow-hidden rounded-lg">
+                        <img src="images/exhibition1.jpg" alt="Regular Ticket" class="w-full h-40 object-cover transition-transform duration-700 hover:scale-110">
+                        <div class="absolute top-2 right-2 bg-white px-3 py-1 rounded-full text-sm font-semibold animate-fade-in">₹99</div>
+                    </div>
+                    <h3 class="text-2xl font-['SF_Pro_Display'] tracking-tight text-center mb-4">Regular Ticket</h3>
+                    <div class="space-y-4">
+                        <ul class="space-y-2">
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.1s;"><span class="text-green-600 mr-2">✓</span> Access to permanent exhibitions</li>
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.2s;"><span class="text-green-600 mr-2">✓</span> Valid for one day</li>
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.3s;"><span class="text-green-600 mr-2">✓</span> Audio guide included</li>
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.4s;"><span class="text-green-600 mr-2">✓</span> Museum map provided</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Special Exhibition -->
+                <div class="vintage-card p-6 transform transition-all duration-500 hover:scale-105 hover:shadow-xl animate-slide-up" style="animation-delay: 0.2s;">
+                    <div class="relative mb-4 overflow-hidden rounded-lg">
+                        <img src="images/exhibition2.jpg" alt="Special Exhibition" class="w-full h-40 object-cover transition-transform duration-700 hover:scale-110">
+                        <div class="absolute top-2 right-2 bg-white px-3 py-1 rounded-full text-sm font-semibold animate-fade-in">₹199</div>
+                    </div>
+                    <h3 class="text-2xl font-['SF_Pro_Display'] tracking-tight text-center mb-4">Special Exhibition</h3>
+                    <div class="space-y-4">
+                        <ul class="space-y-2">
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.3s;"><span class="text-green-600 mr-2">✓</span> All regular ticket benefits</li>
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.4s;"><span class="text-green-600 mr-2">✓</span> Special exhibition access</li>
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.5s;"><span class="text-green-600 mr-2">✓</span> Guided tour included</li>
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.6s;"><span class="text-green-600 mr-2">✓</span> Souvenir catalogue</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Annual Pass -->
+                <div class="vintage-card p-6 transform transition-all duration-500 hover:scale-105 hover:shadow-xl animate-slide-up" style="animation-delay: 0.4s;">
+                    <div class="relative mb-4 overflow-hidden rounded-lg">
+                        <img src="images/exhibition3.jpg" alt="Annual Pass" class="w-full h-40 object-cover transition-transform duration-700 hover:scale-110">
+                        <div class="absolute top-2 right-2 bg-white px-3 py-1 rounded-full text-sm font-semibold animate-fade-in">₹499</div>
+                    </div>
+                    <h3 class="text-2xl font-['SF_Pro_Display'] tracking-tight text-center mb-4">Annual Pass</h3>
+                    <div class="space-y-4">
+                        <ul class="space-y-2">
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.5s;"><span class="text-green-600 mr-2">✓</span> Unlimited visits for one year</li>
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.6s;"><span class="text-green-600 mr-2">✓</span> Priority access to exhibitions</li>
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.7s;"><span class="text-green-600 mr-2">✓</span> Exclusive member events</li>
+                            <li class="flex items-center animate-slide-up" style="animation-delay: 0.8s;"><span class="text-green-600 mr-2">✓</span> 10% off at museum shop</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="max-w-4xl mx-auto mt-16">
+                <div class="vintage-card p-6 relative overflow-hidden animate-slide-up" style="animation-delay: 0.6s;">
+                    <div class="absolute top-0 right-0 w-1/3 h-full opacity-10">
+                        <img src="images/paper-texture.png" alt="Texture" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-2xl font-['SF_Pro_Display'] tracking-tight mb-6">Visiting Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-xl font-semibold mb-4">Opening Hours</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-center animate-slide-up" style="animation-delay: 0.7s;"><span class="font-bold mr-2">Monday - Friday:</span> 9:00 AM - 5:00 PM</li>
+                                <li class="flex items-center animate-slide-up" style="animation-delay: 0.8s;"><span class="font-bold mr-2">Saturday - Sunday:</span> 10:00 AM - 6:00 PM</li>
+                                <li class="flex items-center animate-slide-up" style="animation-delay: 0.9s;"><span class="font-bold mr-2">Last Entry:</span> 30 minutes before closing</li>
+                                <li class="flex items-center animate-slide-up" style="animation-delay: 1s;"><span class="font-bold mr-2">Closed:</span> Major holidays</li>
+                            </ul>
                         </div>
-                    <?php endif; ?>
-
-                    <div>
-                        <label class="block mb-2">Select Exhibition</label>
-                        <select name="exhibition_id" class="w-full p-2 border rounded" required>
-                            <option value="">Select an exhibition</option>
-                            <option value="1" <?php echo ($exhibition_id == 1) ? 'selected' : ''; ?>>Mughal Era Treasures - ₹500</option>
-                            <option value="2" <?php echo ($exhibition_id == 2) ? 'selected' : ''; ?>>Ancient Indian Civilizations - ₹450</option>
-                            <option value="3" <?php echo ($exhibition_id == 3) ? 'selected' : ''; ?>>Modern Art Revolution - ₹550</option>
-                            <option value="4" <?php echo ($exhibition_id == 4) ? 'selected' : ''; ?>>Digital Art & Technology - ₹600</option>
-                        </select>
+                        <div>
+                            <h4 class="text-xl font-semibold mb-4">Important Notes</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-center animate-slide-up" style="animation-delay: 0.7s;"><span class="text-green-600 mr-2">✓</span> Children under 5 enter free</li>
+                                <li class="flex items-center animate-slide-up" style="animation-delay: 0.8s;"><span class="text-green-600 mr-2">✓</span> Student discounts available (with ID)</li>
+                                <li class="flex items-center animate-slide-up" style="animation-delay: 0.9s;"><span class="text-green-600 mr-2">✓</span> Group bookings welcome</li>
+                                <li class="flex items-center animate-slide-up" style="animation-delay: 1s;"><span class="text-green-600 mr-2">✓</span> Wheelchair accessible</li>
+                            </ul>
+                        </div>
                     </div>
+                </div>
+            </div>
 
-                    <div>
-                        <label class="block mb-2">Entry Type</label>
-                        <select name="entry_type" class="w-full p-2 border rounded" required>
-                            <option value="museum">Museum Entry</option>
-                            <option value="show">Special Exhibition</option>
-                        </select>
+            <!-- Current Exhibitions -->
+            <div class="max-w-4xl mx-auto mt-16">
+                <h3 class="text-3xl font-['SF_Pro_Display'] tracking-tight text-center mb-8">Current Exhibitions</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="vintage-card p-6 transform transition-all duration-500 hover:scale-105 hover:shadow-xl animate-slide-up" style="animation-delay: 0.8s;">
+                        <div class="relative mb-4 overflow-hidden rounded-lg">
+                            <img src="images/exhibition4.jpg" alt="Mughal Era Treasures" class="w-full h-48 object-cover transition-transform duration-700 hover:scale-110">
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                                <h4 class="text-xl font-['SF_Pro_Display'] tracking-tight text-white">Mughal Era Treasures</h4>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="animate-slide-up" style="animation-delay: 0.9s;"><span class="font-bold">Duration:</span> June - August 2023</p>
+                            <p class="animate-slide-up" style="animation-delay: 1s;"><span class="font-bold">Location:</span> Main Gallery</p>
+                            <p class="animate-slide-up" style="animation-delay: 1.1s;">Experience the grandeur of the Mughal Empire through our carefully curated collection of artifacts, jewelry, and artwork.</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block mb-2">Date</label>
-                        <input type="date" name="visit_date" class="w-full p-2 border rounded" required min="<?php echo date('Y-m-d'); ?>">
+                    
+                    <div class="vintage-card p-6 transform transition-all duration-500 hover:scale-105 hover:shadow-xl animate-slide-up" style="animation-delay: 1s;">
+                        <div class="relative mb-4 overflow-hidden rounded-lg">
+                            <img src="images/exhibition5.jpg" alt="Ancient Indian Civilizations" class="w-full h-48 object-cover transition-transform duration-700 hover:scale-110">
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                                <h4 class="text-xl font-['SF_Pro_Display'] tracking-tight text-white">Ancient Indian Civilizations</h4>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="animate-slide-up" style="animation-delay: 1.1s;"><span class="font-bold">Type:</span> Permanent Exhibition</p>
+                            <p class="animate-slide-up" style="animation-delay: 1.2s;"><span class="font-bold">Location:</span> East Wing</p>
+                            <p class="animate-slide-up" style="animation-delay: 1.3s;">Discover the rich history of ancient Indian civilizations through archaeological findings and historical artifacts.</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block mb-2">Time</label>
-                        <select name="visit_time" class="w-full p-2 border rounded" required>
-                            <option value="10:00">10:00 AM</option>
-                            <option value="11:00">11:00 AM</option>
-                            <option value="12:00">12:00 PM</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block mb-2">Number of Visitors</label>
-                        <input type="number" name="visitors" min="1" max="10" class="w-full p-2 border rounded" required>
-                    </div>
-                    <button type="button" id="proceedButton" class="w-full vintage-button">
-                        Proceed to Payment
-                    </button>
-                </form>
-
-                <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-                <script>
-                    document.getElementById('proceedButton').onclick = async function() {
-                        try {
-                            // Validate form
-                            const form = document.getElementById('bookingForm');
-                            if (!form.checkValidity()) {
-                                form.reportValidity();
-                                return;
-                            }
-
-                            // Show loading state
-                            this.disabled = true;
-                            this.innerHTML = 'Processing...';
-
-                            // Create order
-                            const response = await fetch('process-payment.php', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                },
-                                body: new URLSearchParams(new FormData(form))
-                            });
-                            
-                            const data = await response.json();
-                            if (data.status !== 'success') {
-                                throw new Error(data.message || 'Payment initialization failed');
-                            }
-
-                            // Open Razorpay checkout
-                            var options = {
-                                "key": "<?php echo RAZORPAY_KEY_ID; ?>",
-                                "amount": data.order.amount,
-                                "currency": data.order.currency,
-                                "name": "Museum Booking",
-                                "description": "Booking for Exhibition",
-                                "order_id": data.order.id,
-                                "handler": function (response) {
-                                    // Create payment form
-                                    const paymentForm = document.createElement('form');
-                                    paymentForm.method = 'POST';
-                                    paymentForm.action = 'verify-payment.php';
-                                    
-                                    // Add payment details
-                                    const paymentId = document.createElement('input');
-                                    paymentId.type = 'hidden';
-                                    paymentId.name = 'razorpay_payment_id';
-                                    paymentId.value = response.razorpay_payment_id;
-                                    
-                                    const orderId = document.createElement('input');
-                                    orderId.type = 'hidden';
-                                    orderId.name = 'razorpay_order_id';
-                                    orderId.value = response.razorpay_order_id;
-                                    
-                                    const signature = document.createElement('input');
-                                    signature.type = 'hidden';
-                                    signature.name = 'razorpay_signature';
-                                    signature.value = response.razorpay_signature;
-                                    
-                                    // Add form elements
-                                    paymentForm.appendChild(paymentId);
-                                    paymentForm.appendChild(orderId);
-                                    paymentForm.appendChild(signature);
-                                    
-                                    // Submit form
-                                    document.body.appendChild(paymentForm);
-                                    paymentForm.submit();
-                                },
-                                "prefill": {
-                                    "name": "<?php echo isset($_SESSION['first_name']) ? $_SESSION['first_name'] : ''; ?>",
-                                    "email": "<?php echo isset($_SESSION['email']) ? $_SESSION['email'] : ''; ?>",
-                                    "contact": "<?php echo isset($_SESSION['mobile_number']) ? $_SESSION['mobile_number'] : ''; ?>"
-                                },
-                                "theme": {
-                                    "color": "#8B4513"
-                                }
-                            };
-                            
-                            var rzp = new Razorpay(options);
-                            rzp.open();
-                            
-                        } catch (error) {
-                            alert('Payment initialization failed: ' + error.message);
-                            console.error('Error:', error);
-                            // Reset button state
-                            this.disabled = false;
-                            this.innerHTML = 'Proceed to Payment';
-                        }
-                    };
-                </script>
+                </div>
             </div>
         </div>
     </section>

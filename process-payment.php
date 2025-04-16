@@ -1,117 +1,116 @@
 <?php
 session_start();
 require_once 'includes/razorpay-config.php';
-require_once 'db.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Please login to book tickets.']);
-    exit();
+// Check if amount is set in session
+if (!isset($_SESSION['total_amount'])) {
+    header('Location: index.php');
+    exit;
 }
 
-// Define exhibition prices
-$exhibition_prices = [
-    '1' => 500, // Mughal Era Treasures
-    '2' => 450, // Ancient Indian Civilizations
-    '3' => 550, // Modern Art Revolution
-    '4' => 600  // Digital Art & Technology
-];
-
-// Validate form data
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
     try {
-        // Get exhibition_id from POST
-        $exhibition_id = $_POST['exhibition_id'] ?? null;
-        
-        // Validate exhibition_id first
-        if (empty($exhibition_id) || !isset($exhibition_prices[$exhibition_id])) {
-            throw new Exception("Please select a valid exhibition to book tickets.");
+        // Check if user is logged in
+        if (!isset($_SESSION['user_id'])) {
+            throw new Exception('Please log in to continue');
         }
 
-        // Get price based on exhibition_id
-        $price = $exhibition_prices[$exhibition_id];
-
-        // Validate required fields
-        $required_fields = ['entry_type', 'visit_date', 'visit_time', 'visitors'];
-        foreach ($required_fields as $field) {
-            if (empty($_POST[$field])) {
-                throw new Exception("Missing required field: " . $field);
-            }
+        // Check if amount exists in session
+        if (!isset($_SESSION['total_amount'])) {
+            throw new Exception('No amount found in session');
         }
 
-        $entry_type = $_POST['entry_type'];
-        $visit_date = $_POST['visit_date'];
-        $visit_time = $_POST['visit_time'];
-        $visitors = (int)$_POST['visitors'];
-
-        // Validate visitors count
-        if ($visitors < 1 || $visitors > 10) {
-            throw new Exception("Number of visitors must be between 1 and 10");
-        }
-
-        // Calculate total amount
-        $adult_tickets = ceil($visitors * 0.7); // 70% adult tickets
-        $child_tickets = $visitors - $adult_tickets;
-        $total_amount = ($adult_tickets * $price) + ($child_tickets * ($price * 0.5));
-
-        // Create Razorpay order
         $api = getRazorpayInstance();
 
+        // Create unique receipt ID
+        $receipt = 'rcpt_' . time() . '_' . uniqid();
+        
         $orderData = [
-            'receipt'         => 'order_' . time(),
-            'amount'          => $total_amount * 100, // Amount in paise
-            'currency'        => 'INR',
-            'payment_capture' => 1,
-            'notes'          => [
-                'exhibition_id' => $exhibition_id,
-                'entry_type' => $entry_type,
-                'visit_date' => $visit_date,
-                'visit_time' => $visit_time,
-                'visitors' => $visitors
-            ]
+            'receipt'         => $receipt,
+            'amount'         => $_SESSION['total_amount'] * 100, // Convert to paise
+            'currency'       => 'INR',
+            'payment_capture' => 1 // Auto capture
         ];
 
-        $razorpayOrder = $api->order->create($orderData);
-        
-        // Store booking details in session
-        $_SESSION['booking_details'] = [
-            'exhibition_id' => $exhibition_id,
-            'entry_type' => $entry_type,
-            'visit_date' => $visit_date,
-            'visit_time' => $visit_time,
-            'visitors' => $visitors,
-            'adult_tickets' => $adult_tickets,
-            'child_tickets' => $child_tickets,
-            'total_amount' => $total_amount
-        ];
+        // Create order
+        $order = $api->order->create($orderData);
+
+        if (!$order || !isset($order->id)) {
+            throw new Exception('Failed to create order');
+        }
 
         // Return success response with order details
-        header('Content-Type: application/json');
         echo json_encode([
             'status' => 'success',
             'order' => [
-                'id' => $razorpayOrder->id,
-                'amount' => $razorpayOrder->amount,
-                'currency' => $razorpayOrder->currency,
-                'receipt' => $razorpayOrder->receipt
+                'id' => $order->id,
+                'amount' => $order->amount,
+                'currency' => $order->currency
             ]
         ]);
-        exit();
 
     } catch (Exception $e) {
-        header('Content-Type: application/json');
+        http_response_code(500);
         echo json_encode([
             'status' => 'error',
             'message' => $e->getMessage()
         ]);
-        exit();
     }
-} else {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Invalid request method'
-    ]);
-    exit();
+    exit;
 }
 ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Process Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Payment Details</h2>
+        <p>Total Amount: ₹<?php echo $_SESSION['total_amount']; ?></p>
+        <button id="pay-button">Pay Now</button>
+    </div>
+
+    <script>
+        document.getElementById('pay-button').onclick = function() {
+            fetch('process-payment.php', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    var options = {
+                        "key": "<?php echo RAZORPAY_KEY_ID; ?>",
+                        "amount": data.order.amount,
+                        "currency": data.order.currency,
+                        "name": "Museum Booking",
+                        "description": "Ticket Booking Payment",
+                        "order_id": data.order.id,
+                        "handler": function (response) {
+                            // On successful payment, redirect to verify-payment.php
+                            window.location.href = 'verify-payment.php?payment_id=' + response.razorpay_payment_id + 
+                                '&order_id=' + response.razorpay_order_id + 
+                                '&signature=' + response.razorpay_signature;
+                        },
+                        "prefill": {
+                            "name": "<?php echo $_SESSION['visitor_name']; ?>",
+                            "contact": "<?php echo $_SESSION['mobile_number']; ?>"
+                        },
+                        "theme": {
+                            "color": "#F37254"
+                        }
+                    };
+                    var rzp = new Razorpay(options);
+                    rzp.open();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        };
+    </script>
+</body>
+</html>

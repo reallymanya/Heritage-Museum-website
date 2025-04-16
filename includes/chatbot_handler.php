@@ -44,12 +44,14 @@ function handleChatbotMessage($message, $userId) {
             if (strtolower($message) === 'book') {
                 $_SESSION['booking_state'] = 'select_show';
                 $response = "Please select a show by entering its number:\n\n";
-                $response .= "1. Ancient Egypt Exhibition - ₹25.00\n";
-                $response .= "   Explore the mysteries of ancient Egypt through artifacts and mummies\n\n";
-                $response .= "2. Modern Art Gallery - ₹20.00\n";
-                $response .= "   Contemporary art from leading artists around the world\n\n";
-                $response .= "3. Dinosaur World - ₹30.00\n";
-                $response .= "   Life-size dinosaur models and fossil exhibitions\n";
+                $response .= "1. Mughal Era Treasures - ₹100\n";
+                $response .= "   Explore the opulent world of Mughal art and architecture\n\n";
+                $response .= "2. Ancient Indian Civilizations - ₹75\n";
+                $response .= "   Journey through time to discover India's ancient heritage\n\n";
+                $response .= "3. Modern Art Revolution - ₹150\n";
+                $response .= "   Witness the evolution of Indian art in the modern era\n\n";
+                $response .= "4. Digital Art & Technology - ₹150\n";
+                $response .= "   Explore the intersection of traditional art and modern technology\n";
             } else {
                 $response = "Welcome to Museum Booking System!\n";
                 $response .= "Type 'book' to start booking tickets.";
@@ -58,9 +60,10 @@ function handleChatbotMessage($message, $userId) {
 
         case 'select_show':
             $shows = [
-                1 => ['name' => 'Ancient Egypt Exhibition', 'price' => 25.00],
-                2 => ['name' => 'Modern Art Gallery', 'price' => 20.00],
-                3 => ['name' => 'Dinosaur World', 'price' => 30.00]
+                1 => ['name' => 'Mughal Era Treasures', 'price' => 100.00],
+                2 => ['name' => 'Ancient Indian Civilizations', 'price' => 75.00],
+                3 => ['name' => 'Modern Art Revolution', 'price' => 150.00],
+                4 => ['name' => 'Digital Art & Technology', 'price' => 150.00]
             ];
 
             if (isset($shows[$message])) {
@@ -73,7 +76,7 @@ function handleChatbotMessage($message, $userId) {
                 $response .= "Price per ticket: ₹{$show['price']}\n\n";
                 $response .= "How many tickets would you like to book?";
             } else {
-                $response = "Please select a valid show number (1-3).";
+                $response = "Please select a valid show number (1-4).";
             }
             break;
 
@@ -137,9 +140,8 @@ function handleChatbotMessage($message, $userId) {
                 $response .= "Show Time: {$_SESSION['show_time']}\n";
                 $response .= "Mobile: {$_SESSION['mobile_number']}\n\n";
                 
-                // Add payment link with full URL path
-                $response .= "Click here to make payment: ";
-                $response .= "<a href='/Museum-Booking-backend/payment.php?amount={$_SESSION['total_amount']}' class='payment-link' style='color: #4CAF50; text-decoration: none; font-weight: bold;'>➤ Pay ₹{$_SESSION['total_amount']}</a>";
+                // Add payment button with proper amount
+                $response .= "[[PAYMENT_BUTTON:" . $_SESSION['total_amount'] . "]]";
                 
                 $_SESSION['booking_state'] = 'payment_pending';
             } else {

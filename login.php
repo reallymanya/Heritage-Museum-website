@@ -7,30 +7,30 @@ require_once 'db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
     try {
-        $email = trim($_POST['email']);
+        $username = trim($_POST['username']);
         $password = trim($_POST['password']);
         
         // Validate input
-        if (empty($email) || empty($password)) {
-            throw new Exception("Email and password are required");
+        if (empty($username) || empty($password)) {
+            throw new Exception("Username and password are required");
         }
 
         // Check user credentials
-        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
         if (!$stmt) {
             throw new Exception("Database error: " . $conn->error);
         }
 
-        $stmt->bind_param("s", $email);
+        $stmt->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();
         $user = $result->fetch_assoc();
 
         if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user'] = $user['email'];
+            $_SESSION['user'] = $user['username'];
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['first_name'] = $user['first_name'];
-            $_SESSION['last_name'] = $user['last_name'];
+            // $_SESSION['first_name'] = $user['first_name'];
+            // $_SESSION['last_name'] = $user['last_name'];
             
             // Clear any existing error messages
             unset($_SESSION['error']);
@@ -90,8 +90,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["login"])) {
                     <?php endif; ?>
                     <form method="POST" action="" class="space-y-6">
                         <div>
-                            <label class="block mb-2">Email</label>
-                            <input type="email" name="email" class="w-full p-2 border rounded" placeholder="Enter your email" required>
+                            <label class="block mb-2">Username</label>
+                            <input type="text" name="username" class="w-full p-2 border rounded" placeholder="Enter your username" required>
                         </div>
                         <div>
                             <label class="block mb-2">Password</label>
