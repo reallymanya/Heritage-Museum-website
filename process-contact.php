@@ -1,52 +1,10 @@
 <?php
 session_start();
-include 'includes/db-connect.php';
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $subject = $_POST['subject'];
-    $message = $_POST['message'];
-    
-    // Validate input
-    if (empty($name) || empty($email) || empty($subject) || empty($message)) {
-        $_SESSION['error'] = "All fields are required";
-        header("Location: contact.php");
-        exit();
-    }
-    
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_SESSION['error'] = "Invalid email format";
-        header("Location: contact.php");
-        exit();
-    }
-    
-    // Insert into database
-    $stmt = $conn->prepare("INSERT INTO contact_messages (name, email, subject, message, created_at) VALUES (?, ?, ?, ?, NOW())");
-    $stmt->bind_param("ssss", $name, $email, $subject, $message);
-    
-    if ($stmt->execute()) {
-        $_SESSION['success'] = "Thank you for your message! We will get back to you soon.";
-    } else {
-        $_SESSION['error'] = "Error sending message. Please try again later.";
-    }
-    
-    $stmt->close();
-    $conn->close();
-    
-    header("Location: contact.php");
-    exit();
-} else {
-    header("Location: contact.php");
-    exit();
-}
-<?php
+include 'includes/db-connect.php'; // Include your DB connection file
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-require "vendor/autoload.php";
-$mail = new PHPMailer(true);
-session_start();
-include 'includes/db-connect.php';
+
+require "vendor/autoload.php"; // Autoload PHPMailer's dependencies
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
@@ -56,28 +14,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // Validate input
     if (empty($name) || empty($email) || empty($subject) || empty($message)) {
-        $_SESSION['error'] = "All fields are required";
+        $_SESSION['error'] = "All fields are required.";
         header("Location: contact.php");
         exit();
     }
     
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_SESSION['error'] = "Invalid email format";
+        $_SESSION['error'] = "Invalid email format.";
         header("Location: contact.php");
         exit();
     }
 
     try {
+        // ===== Send email to admin (Shivangi) =====
         $mail = new PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host       = "smtp.gmail.com";
-        $mail->SMTPAuth   = true;
-        $mail->Username   = "shivangishreya958@gmail.com"; // your Gmail
-        $mail->Password   = "icmu abzc gyno ibid"; // Use app password for security
+        $mail->Host = "smtp.gmail.com";
+        $mail->SMTPAuth = true;
+        $mail->Username = "shivangishreya958@gmail.com"; // Use your Gmail
+        $mail->Password = "icmu abzc gyno ibid"; // Use app password for Gmail security
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+        $mail->Port = 587;
 
-        // ===== 1. Email to Shivangi =====
+        // Admin email settings
         $mail->setFrom("shivangishreya958@gmail.com", "Heritage Museum");
         $mail->addAddress("shivangishreya958@gmail.com", "Shivangi Shreya");
         $mail->addReplyTo($email, $name);
@@ -94,10 +53,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail->AltBody = strip_tags($message);
         $mail->send();
 
-        // ===== 2. Confirmation Email to User =====
+        // ===== Send confirmation email to user =====
         $mail->clearAddresses();
         $mail->clearReplyTos();
-
         $mail->addAddress($email, $name);
         $mail->Subject = "Thank you for contacting Heritage Museum";
         $mail->Body = "
@@ -111,11 +69,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail->send();
 
     } catch (Exception $e) {
-        echo "Mailer Error: " . $mail->ErrorInfo;
-        exit(); // stop here if email fails
+        $_SESSION['error'] = "Mailer Error: " . $mail->ErrorInfo;
+        header("Location: contact.php");
+        exit();
     }
     
-    // Insert into database
+    // Insert message into the database
     $stmt = $conn->prepare("INSERT INTO contact_messages (name, email, subject, message, created_at) VALUES (?, ?, ?, ?, NOW())");
     $stmt->bind_param("ssss", $name, $email, $subject, $message);
     
@@ -134,4 +93,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: contact.php");
     exit();
 }
-?> 
+?>
