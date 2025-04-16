@@ -4,20 +4,22 @@ include 'includes/header.php';
 ?>
 
     <!-- Hero Section -->
-    <section class="py-20 relative" style="background-image: url('images/musuem-bg.png'); background-size: cover; background-position: center;">
+
+    <section class="py-12 md:py-20 relative" style="background-image: url('images/musuem-bg.png'); background-size: cover; background-position: center;">
         <div class="absolute inset-0 bg-black opacity-50"></div>
         <div class="container mx-auto px-4 relative z-10">
             <div class="max-w-3xl mx-auto text-center text-white">
-                <h1 class="text-5xl font-['SF_Pro_Display'] tracking-tight mb-6 animate-fade-in">Discover Our Heritage</h1>
-                <p class="text-xl mb-8 animate-slide-up">Explore the rich cultural heritage of India through our fascinating exhibitions and collections.</p>
-                <div class="flex justify-center space-x-4">
-                    <img src="images/collection1.jpg" alt="Collection 1" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg animate-slide-up" style="animation-delay: 0s;">
-                    <img src="images/collection2.jpg" alt="Collection 2" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg animate-slide-up" style="animation-delay: 0.5s;">
-                    <img src="images/collection3.jpg" alt="Collection 3" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg animate-slide-up" style="animation-delay: 1s;">
+                <h1 class="text-3xl md:text-5xl font-['SF_Pro_Display'] tracking-tight mb-4 md:mb-6 animate-fade-in">Discover Our Heritage</h1>
+                <p class="text-lg md:text-xl mb-6 md:mb-8 animate-slide-up">Explore the rich cultural heritage of India through our fascinating exhibitions and collections.</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <img src="images/collection1.jpg" alt="Collection 1" class="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover border-4 border-white shadow-lg animate-slide-up" style="animation-delay: 0s;">
+                    <img src="images/collection2.jpg" alt="Collection 2" class="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover border-4 border-white shadow-lg animate-slide-up" style="animation-delay: 0.5s;">
+                    <img src="images/collection3.jpg" alt="Collection 3" class="w-16 h-16 md:w-24 md:h-24 rounded-full object-cover border-4 border-white shadow-lg animate-slide-up" style="animation-delay: 1s;">
                 </div>
             </div>
         </div>
     </section>
+
 
     <!-- Ticket Information Section -->
     <section class="py-16 bg-[#F5F5DC]">
@@ -144,10 +146,5 @@ include 'includes/header.php';
         </div>
     </section>
 
-    <!-- Cultural Elements -->
-    <div class="fixed top-0 left-0 w-full h-2 bg-gradient-to-r from-[#FF9933] via-white to-[#138808]"></div>
-    <div class="fixed bottom-0 left-0 w-full h-2 bg-gradient-to-r from-[#FF9933] via-white to-[#138808]"></div>
-    <div class="fixed left-0 top-0 h-full w-2 bg-gradient-to-b from-[#FF9933] via-white to-[#138808]"></div>
-    <div class="fixed right-0 top-0 h-full w-2 bg-gradient-to-b from-[#FF9933] via-white to-[#138808]"></div>
 
 <?php include 'includes/footer.php'; ?> 
